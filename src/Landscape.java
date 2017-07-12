@@ -28,8 +28,8 @@ public class Landscape extends GLCanvas implements GLEventListener,KeyListener  
     private static final int CANVAS_WIDTH = 1920;  // width of the drawable
     private static final int CANVAS_HEIGHT = 1080; // height of the drawable
     private static final int FPS = 60; // animator's target frames per second
-    static int w=20;
-    static int h=20;
+    static int w=40;
+    static int h=40;
     public static String cc=" ";
     public static JFrame frame = new JFrame();
     static double []eye = new double[3];
@@ -171,7 +171,7 @@ public class Landscape extends GLCanvas implements GLEventListener,KeyListener  
     public GLU glu;
     @Override
     public void init(GLAutoDrawable drawable) {
-        n=   genworld(n,w,h,3);
+        n=   genworld(n,w,h,5);
         for (int i=0;i<w;i++){
             for (int j=0;j<h;j++){
                 System.out.print(n[i][j]);
@@ -440,8 +440,8 @@ public class Landscape extends GLCanvas implements GLEventListener,KeyListener  
         gl.glVertex3f(x+r, y, z);//100
         gl.glEnd();
     }
-    static void obworld(int[][] world, int x,int y){
-       int r =  (int) (Math.random()*18)-8;
+    static void obworld(int[][] world, int x,int y,int param){
+       int r =  (int) (Math.random()*(param+3));
        world[x][y]=r;
     }
 static class worlds{
@@ -472,14 +472,14 @@ static class worlds{
         for (int i=0;i<w;i++){
             for (int j=0; j<h; j++){
                 if (world[i][j]!=0){
-                   if (i-1>=0 && j-1>=0) obworld(world,i-1,j-1);
-                    if (i-1>=0 ) obworld(world,i-1,j);
-                    if (j-1>=0 ) obworld(world,i,j-1);
-                    if (j+1<h ) obworld(world,i,j+1);
-                    if (i+1<w ) obworld(world,i+1,j);
-                    if (i+1<w && j+1<h) obworld(world,i+1,j+1);
-                    if (i-1>=0 && j+1<h) obworld(world,i-1,j+1);
-                    if (i+1<w && j-1>=0) obworld(world,i+1,j-1);
+                   if (i-1>=0 && j-1>=0) obworld(world,i-1,j-1,world[i][j]);
+                    if (i-1>=0 ) obworld(world,i-1,j,world[i][j]);
+                    if (j-1>=0 ) obworld(world,i,j-1,world[i][j]);
+                    if (j+1<h ) obworld(world,i,j+1,world[i][j]);
+                    if (i+1<w ) obworld(world,i+1,j,world[i][j]);
+                    if (i+1<w && j+1<h) obworld(world,i+1,j+1,world[i][j]);
+                    if (i-1>=0 && j+1<h) obworld(world,i-1,j+1,world[i][j]);
+                    if (i+1<w && j-1>=0) obworld(world,i+1,j-1,world[i][j]);
                 }
             }
         }
