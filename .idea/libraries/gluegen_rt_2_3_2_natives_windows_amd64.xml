@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="gluegen-rt-2.3.2-natives-windows-amd64">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/../3dgame/lib/gluegen-rt-2.3.2-natives-windows-amd64.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
