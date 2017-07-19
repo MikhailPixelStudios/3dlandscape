@@ -4,6 +4,7 @@
 import com.jogamp.opengl.*;
 import com.jogamp.opengl.awt.GLCanvas;
 import com.jogamp.opengl.glu.GLU;
+import com.jogamp.opengl.glu.GLUquadric;
 import com.jogamp.opengl.util.FPSAnimator;
 import com.jogamp.opengl.util.awt.ImageUtil;
 import com.jogamp.opengl.util.texture.Texture;
@@ -23,19 +24,21 @@ import static com.jogamp.opengl.fixedfunc.GLLightingFunc.GL_SMOOTH;
 import static com.jogamp.opengl.fixedfunc.GLMatrixFunc.GL_MODELVIEW;
 import static com.jogamp.opengl.fixedfunc.GLMatrixFunc.GL_PROJECTION;
 import static java.lang.Math.*;
-public class Landscape extends GLCanvas implements GLEventListener,KeyListener  {
+public class Landscape extends GLCanvas implements GLEventListener,KeyListener {
     private static String TITLE = "JOGL 2.0 Setup (GLCanvas)";  // window's title
     private static final int CANVAS_WIDTH = 1920;  // width of the drawable
     private static final int CANVAS_HEIGHT = 1080; // height of the drawable
     private static final int FPS = 60; // animator's target frames per second
-    static int w=40;
-    static int h=40;
-    public static String cc=" ";
+    static int w = 80;
+    static int h = 80;
+    public static String cc = " ";
     public static JFrame frame = new JFrame();
-    static double []eye = new double[3];
+    static double[] eye = new double[3];
     static double[] center = new double[3];
-    public static int[][] n=new int[w][h];
-    public static void main(String args[]){
+    public static float[][] n = new float[w][h];
+    static char [][] land = new char[w][h];
+
+    public static void main(String args[]) {
 
         // dots=new dot[1000000];
 
@@ -44,16 +47,10 @@ public class Landscape extends GLCanvas implements GLEventListener,KeyListener  
             @Override
             public void run() {
 
-                n=   genworld(n,w,h,2);
-                for (int i=0;i<w;i++){
-                    for (int j=0;j<h;j++){
-                        System.out.print(n[i][j]);
-                    }
-                    System.out.println();
-                }
-                eye[0]=1.5;
-                eye[2]=1.5;
-              //  eye[1]=10;
+
+                eye[0] = 1.5;
+                eye[2] = 1.5;
+                //  eye[1]=10;
                 // Create the OpenGL rendering canvas
                 GLCanvas canvas = new Landscape();
                 canvas.setPreferredSize(new Dimension(CANVAS_WIDTH, CANVAS_HEIGHT));
@@ -71,36 +68,36 @@ public class Landscape extends GLCanvas implements GLEventListener,KeyListener  
 
                     @Override
                     public void keyPressed(KeyEvent e) {
-                        if (e.getKeyCode()==KeyEvent.VK_W){
-                            cc="w";
+                        if (e.getKeyCode() == KeyEvent.VK_W) {
+                            cc = "w";
                         }
-                        if (e.getKeyCode()==KeyEvent.VK_A){
-                            cc="a";
+                        if (e.getKeyCode() == KeyEvent.VK_A) {
+                            cc = "a";
                         }
-                        if (e.getKeyCode()==KeyEvent.VK_S){
-                            cc="s";
+                        if (e.getKeyCode() == KeyEvent.VK_S) {
+                            cc = "s";
                         }
-                        if (e.getKeyCode()==KeyEvent.VK_D){
-                            cc="d";
+                        if (e.getKeyCode() == KeyEvent.VK_D) {
+                            cc = "d";
                         }
-                        if (e.getKeyCode()==KeyEvent.VK_DOWN){
-                            cc="down";
+                        if (e.getKeyCode() == KeyEvent.VK_DOWN) {
+                            cc = "down";
                         }
-                        if (e.getKeyCode()==KeyEvent.VK_LEFT){
-                            cc="left";
+                        if (e.getKeyCode() == KeyEvent.VK_LEFT) {
+                            cc = "left";
                         }
-                        if (e.getKeyCode()==KeyEvent.VK_RIGHT){
-                            cc="right";
+                        if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
+                            cc = "right";
                         }
-                        if (e.getKeyCode()==KeyEvent.VK_UP){
-                            cc="up";
+                        if (e.getKeyCode() == KeyEvent.VK_UP) {
+                            cc = "up";
                         }
                     }
 
 
                     @Override
                     public void keyReleased(KeyEvent e) {
-                        cc=" ";
+                        cc = " ";
                     }
                 });
                 frame.addMouseListener(new MouseAdapter() {
@@ -163,18 +160,27 @@ public class Landscape extends GLCanvas implements GLEventListener,KeyListener  
             }
         });
     }
+
     public Landscape() {
         this.addGLEventListener(this);
     }
-    static Texture ground,water,tree,sky,wall;
+
+    static Texture ground, water, tree, sky, wall, snow,stone,grass,bottom;
 
     public GLU glu;
+
     @Override
     public void init(GLAutoDrawable drawable) {
-        n=   genworld(n,w,h,5);
-        for (int i=0;i<w;i++){
-            for (int j=0;j<h;j++){
+         genworld(n,land, w, h, 5);
+        for (int i = 0; i < w; i++) {
+            for (int j = 0; j < h; j++) {
                 System.out.print(n[i][j]);
+            }
+            System.out.println();
+        }
+        for (int i = 0; i < w; i++) {
+            for (int j = 0; j < h; j++) {
+                System.out.print(land[i][j]);
             }
             System.out.println();
         }
@@ -217,10 +223,10 @@ public class Landscape extends GLCanvas implements GLEventListener,KeyListener  
                 e.printStackTrace();
             }
             ImageUtil.flipImageVertically(img);
-            ground = AWTTextureIO.newTexture(GLProfile.getDefault(), img, true);
-            ground.setTexParameteri(gl, GL2.GL_TEXTURE_WRAP_S, GL2.GL_REPEAT);
-            ground.setTexParameteri(gl, GL2.GL_TEXTURE_WRAP_T, GL2.GL_REPEAT);
-            ground.enable(gl);
+            grass = AWTTextureIO.newTexture(GLProfile.getDefault(), img, true);
+            grass.setTexParameteri(gl, GL2.GL_TEXTURE_WRAP_S, GL2.GL_REPEAT);
+            grass.setTexParameteri(gl, GL2.GL_TEXTURE_WRAP_T, GL2.GL_REPEAT);
+            grass.enable(gl);
             //  inittexture(gl, "ground.jpg", ground);
 
             textureURL2 = getClass().getClassLoader().getResource("sky.jpg");
@@ -239,7 +245,7 @@ public class Landscape extends GLCanvas implements GLEventListener,KeyListener  
                 sky.enable(gl);
             }
 
-            textureURL2 = getClass().getClassLoader().getResource("water.gif");
+            textureURL2 = getClass().getClassLoader().getResource("water.jpg");
             if (textureURL != null) {
 //					textures[i] = TextureIO.newTexture(textureURL, true, null);  // Alternative loader, gives upside down textures!
                 img = null;
@@ -269,7 +275,94 @@ public class Landscape extends GLCanvas implements GLEventListener,KeyListener  
                 tree.setTexParameteri(gl, GL2.GL_TEXTURE_WRAP_T, GL2.GL_REPEAT);
                 tree.enable(gl);
             }
+            textureURL2 = getClass().getClassLoader().getResource("snow.jpg");
+            if (textureURL != null) {
+//					textures[i] = TextureIO.newTexture(textureURL, true, null);  // Alternative loader, gives upside down textures!
+                img = null;
+                try {
+                    img = ImageIO.read(textureURL2);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                ImageUtil.flipImageVertically(img);
+                snow = AWTTextureIO.newTexture(GLProfile.getDefault(), img, true);
+                snow.setTexParameteri(gl, GL2.GL_TEXTURE_WRAP_S, GL2.GL_REPEAT);
+                snow.setTexParameteri(gl, GL2.GL_TEXTURE_WRAP_T, GL2.GL_REPEAT);
+                snow.enable(gl);
+            }
+            textureURL2 = getClass().getClassLoader().getResource("stone.jpg");
+            if (textureURL != null) {
+//					textures[i] = TextureIO.newTexture(textureURL, true, null);  // Alternative loader, gives upside down textures!
+                img = null;
+                try {
+                    img = ImageIO.read(textureURL2);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                ImageUtil.flipImageVertically(img);
+                stone = AWTTextureIO.newTexture(GLProfile.getDefault(), img, true);
+                stone.setTexParameteri(gl, GL2.GL_TEXTURE_WRAP_S, GL2.GL_REPEAT);
+                stone.setTexParameteri(gl, GL2.GL_TEXTURE_WRAP_T, GL2.GL_REPEAT);
+                stone.enable(gl);
+            }
+            textureURL2 = getClass().getClassLoader().getResource("ground.png");
+            if (textureURL != null) {
+//					textures[i] = TextureIO.newTexture(textureURL, true, null);  // Alternative loader, gives upside down textures!
+                img = null;
+                try {
+                    img = ImageIO.read(textureURL2);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                ImageUtil.flipImageVertically(img);
+                ground = AWTTextureIO.newTexture(GLProfile.getDefault(), img, true);
+                ground.setTexParameteri(gl, GL2.GL_TEXTURE_WRAP_S, GL2.GL_REPEAT);
+                ground.setTexParameteri(gl, GL2.GL_TEXTURE_WRAP_T, GL2.GL_REPEAT);
+                ground.enable(gl);
+            }
+            textureURL2 = getClass().getClassLoader().getResource("bottom.jpg");
+            if (textureURL != null) {
+//					textures[i] = TextureIO.newTexture(textureURL, true, null);  // Alternative loader, gives upside down textures!
+                img = null;
+                try {
+                    img = ImageIO.read(textureURL2);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                ImageUtil.flipImageVertically(img);
+                bottom = AWTTextureIO.newTexture(GLProfile.getDefault(), img, true);
+                bottom.setTexParameteri(gl, GL2.GL_TEXTURE_WRAP_S, GL2.GL_REPEAT);
+                bottom.setTexParameteri(gl, GL2.GL_TEXTURE_WRAP_T, GL2.GL_REPEAT);
+                bottom.enable(gl);
+            }
         }
+
+
+
+    }
+
+
+    public void draworld(GL2 gl, GLU glu)
+    {
+
+        gl.glTranslatef(1f, 0.0f, -20.0f);
+        //gl.glRotatef(angleSphere, 1f, 0.0f, 0.0f); //90
+
+        GLUquadric sphere = glu.gluNewQuadric();
+        glu.gluQuadricDrawStyle(sphere, GLU.GLU_LINE);
+        glu.gluQuadricTexture(sphere, true);
+        glu.gluQuadricNormals(sphere, GLU.GLU_SMOOTH);
+        glu.gluQuadricOrientation(sphere, GLU.GLU_OUTSIDE);
+
+        sky.enable(gl); // enable texture
+        sky.bind(gl); // bind texture
+
+        glu.gluSphere(sphere, 100, 0, 0);
+
+        sky.disable(gl);
+        glu.gluDeleteQuadric(sphere);
+      //  angleSphere += speed;
+        //System.out.println(angleSphere);
 
     }
 
@@ -278,12 +371,14 @@ public class Landscape extends GLCanvas implements GLEventListener,KeyListener  
 
     }
 
-    public static void drawground(GL2 gl, int x, float y, int z){
-        ground.bind(gl);
+    public static void drawground(GL2 gl, int x, float y, int z,Texture t){
+        t.bind(gl);
+        gl.glEnable(GL_BLEND);
+        gl.glBlendFunc(1,1);
         gl.glBegin(GL2.GL_QUADS);
         gl.glEnable(GL_TEXTURE_2D);
-        ground.setTexParameteri(gl, GL2.GL_TEXTURE_WRAP_S, GL2.GL_REPEAT);
-        ground.setTexParameteri(gl, GL2.GL_TEXTURE_WRAP_T, GL2.GL_REPEAT);
+        t.setTexParameteri(gl, GL2.GL_TEXTURE_WRAP_S, GL2.GL_REPEAT);
+        t.setTexParameteri(gl, GL2.GL_TEXTURE_WRAP_T, GL2.GL_REPEAT);
         gl.glVertex3f(-x, -y, -z);//001
         gl.glTexCoord2f(0,100);
         gl.glVertex3f(-x ,-y, z);//011
@@ -293,18 +388,39 @@ public class Landscape extends GLCanvas implements GLEventListener,KeyListener  
         gl.glVertex3f(x, -y, -z);//101
         gl.glTexCoord2f(100,100);
         gl.glEnd();
+        gl.glDisable(GL_BLEND);
     }
-    public static void landscape(GL2 gl,float x,float y,float z, int[][]n,int w,int h){
+    public static void landscape(GL2 gl,float x,float y,float z, float[][]n,char [][] land,int w,int h){
         float Zoom = 3;
 
-        ground.bind(gl);
+
         for (int i= 0;i<w-1;i++) // Часть кода из Terrain.Cpp
         {
             for (int j=0;j<h-1;j++)
             {
                 x=i*Zoom;
                 y=j*Zoom;
-
+                switch (land[i][j]){
+                    case '0':{
+                     stone.bind(gl);
+                    }
+                    break;
+                    case '.':{
+                        ground.bind(gl);
+                    }
+                    break;
+                    case',':{
+                        grass.bind(gl);
+                    }
+                    break;
+                    case '*':{
+                        snow.bind(gl);
+                    }
+                    break;
+                    case '~':{
+                        bottom.bind(gl);
+                    }
+                }
                 gl.glBegin(GL_TRIANGLE_STRIP);
                 gl.glTexCoord2f(0,0);
                 gl.glVertex3f(x,z+n[i][j], y);
@@ -440,50 +556,166 @@ public class Landscape extends GLCanvas implements GLEventListener,KeyListener  
         gl.glVertex3f(x+r, y, z);//100
         gl.glEnd();
     }
-    static void obworld(int[][] world, int x,int y,int param){
-       int r =  (int) (Math.random()*(param+3));
-       world[x][y]=r;
+    static float genfl(char c){
+        float f=0;
+        switch (c){
+            case '0':{
+                f=rnd(0,6);
+            }
+            break;
+            case '.':{
+                f=rnd(0,6);
+            }
+            break;
+            case ',':{
+                f=rnd(0,6);
+            }
+            break;
+            case '*':{
+                f=rnd(4,6);
+            }
+            break;
+            case '~':{
+                f=rnd(-4,-1);
+            }
+            break;
+        }
+
+        return f;
+    }
+    static void obworld(float[][] world,char[][] land,char c, int x,int y){
+       /*int r =  (int) (Math.random()*(param+3));
+       world[x][y]=r;*/
+        char cc = genchar(c);
+        land[x][y]=cc;
+        world[x][y]=genfl(cc);
+
     }
 static class worlds{
-       public  int x,y,n;
+       public  int x,y;
+       float n;
+       char t;
     }
-    static int[][] genworld(int[][] world, int w, int h, int seed){
+    static float rnd(float min, float max){
+        float rn=0;
+        rn= (float) (Math.random()*(max-min)+min);
+        return rn;
+    }
+
+    static char genchar(char c){
+        char ch=c;
+        switch (ch){
+            case ' ':{
+                int r =  (int) (Math.random()*10-7);
+                switch (r){
+                    case 0: ch='0';
+                    break;
+                    case 1: ch='*';
+                        break;
+                    case 2: ch='.';
+                        break;
+                    case 3: ch=',';
+
+                }
+            }
+break;
+            case '0':{
+                int r =  (int) (Math.random()*100);
+                if (r>=0 && r<=65) ch='0';
+                if (r>65 && r<=80) ch='.';
+                if (r>80 && r<=95) ch=',';
+                if (r>95 && r<=100) ch='*';
+                //if (r>=95 && r<=100) ch='~';
+            }
+            break;
+
+            case '*':{
+                int r =  (int) (Math.random()*100);
+                if (r>=0 && r<=60) ch='*';
+                //if (r>20 && r<=60) ch='~';
+                if (r>60 && r<=100) ch='0';
+            }
+            break;
+            case '.':{
+                int r =  (int) (Math.random()*100);
+                if (r>=0 && r<=40) ch='.';
+                if (r>40 && r<=80) ch=',';
+                //if (r>80 && r<=95) ch='~';
+                if (r>80 && r<=100) ch='0';
+            }
+            break;
+
+            case ',':{
+                int r =  (int) (Math.random()*100);
+                if (r>=0 && r<=40) ch='.';
+                if (r>40 && r<=80) ch=',';
+                //if (r>80 && r<=90) ch='~';
+                if (r>80 && r<=100) ch='0';
+            }
+
+
+        }
+
+        return ch;
+
+    }
+    static void genworld(float[][] world,char[][] land, int w, int h, int seed){
         worlds[] wo=new worlds[seed];
 
 
-        world=new int[w][h];
+
 
         for (int i=0;i<w;i++){
             for (int j=0; j<h; j++){
                 world[i][j]=0;
+                land[i][j]=' ';
             }
         }
         for (int i=0;i<seed;i++){
             wo[i]=new worlds();
             int x = 0 + (int)(Math.random() * (w-1));
             int y = 0 + (int)(Math.random() * (h-1));
+            char cc=genchar(' ');
             wo[i].x=x;
             wo[i].y=y;
-            wo[i].n=  (int) (Math.random()*18-8);
+            wo[i].n=genfl(cc);
+            wo[i].t=cc;
+
             world[wo[i].x][wo[i].y]=wo[i].n;
+            land[x][y]=cc;
         }
 
 
         for (int i=0;i<w;i++){
             for (int j=0; j<h; j++){
                 if (world[i][j]!=0){
-                   if (i-1>=0 && j-1>=0) obworld(world,i-1,j-1,world[i][j]);
-                    if (i-1>=0 ) obworld(world,i-1,j,world[i][j]);
-                    if (j-1>=0 ) obworld(world,i,j-1,world[i][j]);
-                    if (j+1<h ) obworld(world,i,j+1,world[i][j]);
-                    if (i+1<w ) obworld(world,i+1,j,world[i][j]);
-                    if (i+1<w && j+1<h) obworld(world,i+1,j+1,world[i][j]);
-                    if (i-1>=0 && j+1<h) obworld(world,i-1,j+1,world[i][j]);
-                    if (i+1<w && j-1>=0) obworld(world,i+1,j-1,world[i][j]);
+                    char cc=land[i][j];
+                   if (i-1>=0 && j-1>=0) obworld(world,land,cc,i-1,j-1);
+                    if (i-1>=0 ) obworld(world,land,cc,i-1,j);
+                    if (j-1>=0 ) obworld(world,land,cc,i,j-1);
+                    if (j+1<h ) obworld(world,land,cc,i,j+1);
+                    if (i+1<w ) obworld(world,land,cc,i+1,j);
+                    if (i+1<w && j+1<h) obworld(world,land,cc,i+1,j+1);
+                    if (i-1>=0 && j+1<h) obworld(world,land,cc,i-1,j+1);
+                    if (i+1<w && j-1>=0) obworld(world,land,cc,i+1,j-1);
                 }
             }
         }
-        return world;
+        for (int i=0;i<w;i++){
+            for (int j=0; j<h; j++) {
+             if (land[i][j]==' '){
+                 land[i][j]='~';
+                 world[i][j]=genfl('~');
+             }
+            }
+        }
+    }
+    void drawsphere(GL gl, GLU glu,int radius, int i1,int i2){
+        GLUquadric quad = glu.gluNewQuadric();
+        sky.bind(gl);
+        glu.gluSphere(quad, radius, i1, i2);
+        //   sky.disable(gl);
+        glu.gluDeleteQuadric(quad);
     }
 
     @Override
@@ -597,8 +829,11 @@ static class worlds{
         }
 
       //  drawground(gl,100,0,100);
-        drawcube(gl,-100,-100,-100,400,sky);
-        landscape(gl,0,0,0,n,w,h);
+        //drawcube(gl,-100,-100,-100,400,sky);
+        landscape(gl,0,0,0,n,land,w,h);
+        drawground(gl,-200,0.2f,-200,water);
+        drawsphere(gl,glu,400,15,10);
+
 
     }
 
