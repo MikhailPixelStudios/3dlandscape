@@ -38,8 +38,13 @@ public class Landscape extends GLCanvas implements GLEventListener,KeyListener {
     public static float[][] n = new float[w][h];
     static char [][] land = new char[w][h];
 
+public static BufferedImage img = null;
     public static void main(String args[]) {
-
+        try {
+            img =ImageIO.read(Landscape.class.getResourceAsStream("ghauss.png"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         // dots=new dot[1000000];
 
         // Run the GUI codes in the event-dispatching thread for thread safety
@@ -50,6 +55,8 @@ public class Landscape extends GLCanvas implements GLEventListener,KeyListener {
 
                 eye[0] = 1.5;
                 eye[2] = 1.5;
+                angleX=30;
+                eye[1] =10;
                 //  eye[1]=10;
                 // Create the OpenGL rendering canvas
                 GLCanvas canvas = new Landscape();
@@ -91,6 +98,9 @@ public class Landscape extends GLCanvas implements GLEventListener,KeyListener {
                         }
                         if (e.getKeyCode() == KeyEvent.VK_UP) {
                             cc = "up";
+                        }
+                        if (e.getKeyCode() == KeyEvent.VK_X) {
+                            cc = "x";
                         }
                     }
 
@@ -171,19 +181,19 @@ public class Landscape extends GLCanvas implements GLEventListener,KeyListener {
 
     @Override
     public void init(GLAutoDrawable drawable) {
-         genworld(n,land, w, h, 5);
+        for (int i=0;i<w;i++){
+            for (int j=0; j<h; j++){
+                land[i][j]=' ';
+            }
+        }
+         genworld(n,land, 0, 0, 70,0,5);
         for (int i = 0; i < w; i++) {
             for (int j = 0; j < h; j++) {
                 System.out.print(n[i][j]);
             }
             System.out.println();
         }
-        for (int i = 0; i < w; i++) {
-            for (int j = 0; j < h; j++) {
-                System.out.print(land[i][j]);
-            }
-            System.out.println();
-        }
+
         GL2 gl = drawable.getGL().getGL2();      // get the OpenGL graphics context
         glu = new GLU();                         // get GL Utilities
         gl.glClearColor(0.0f, 0.0f, 0.0f, 0f); // set background (clear) color
@@ -245,7 +255,7 @@ public class Landscape extends GLCanvas implements GLEventListener,KeyListener {
                 sky.enable(gl);
             }
 
-            textureURL2 = getClass().getClassLoader().getResource("water.jpg");
+            textureURL2 = getClass().getClassLoader().getResource("water.gif");
             if (textureURL != null) {
 //					textures[i] = TextureIO.newTexture(textureURL, true, null);  // Alternative loader, gives upside down textures!
                 img = null;
@@ -374,7 +384,7 @@ public class Landscape extends GLCanvas implements GLEventListener,KeyListener {
     public static void drawground(GL2 gl, int x, float y, int z,Texture t){
         t.bind(gl);
         gl.glEnable(GL_BLEND);
-        gl.glBlendFunc(1,1);
+        gl.glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         gl.glBegin(GL2.GL_QUADS);
         gl.glEnable(GL_TEXTURE_2D);
         t.setTexParameteri(gl, GL2.GL_TEXTURE_WRAP_S, GL2.GL_REPEAT);
@@ -421,6 +431,7 @@ public class Landscape extends GLCanvas implements GLEventListener,KeyListener {
                         bottom.bind(gl);
                     }
                 }
+                ground.bind(gl);
                 gl.glBegin(GL_TRIANGLE_STRIP);
                 gl.glTexCoord2f(0,0);
                 gl.glVertex3f(x,z+n[i][j], y);
@@ -556,7 +567,7 @@ public class Landscape extends GLCanvas implements GLEventListener,KeyListener {
         gl.glVertex3f(x+r, y, z);//100
         gl.glEnd();
     }
-    static float genfl(char c){
+   /* static float genfl(char c){
         float f=0;
         switch (c){
             case '0':{
@@ -582,10 +593,10 @@ public class Landscape extends GLCanvas implements GLEventListener,KeyListener {
         }
 
         return f;
-    }
-    static void obworld(float[][] world,char[][] land,char c, int x,int y){
-       /*int r =  (int) (Math.random()*(param+3));
-       world[x][y]=r;*/
+    }*/
+ /*   static void obworld(float[][] world,char[][] land,char c, int x,int y){
+       *//*int r =  (int) (Math.random()*(param+3));
+       world[x][y]=r;*//*
         char cc = genchar(c);
         land[x][y]=cc;
         world[x][y]=genfl(cc);
@@ -596,12 +607,12 @@ static class worlds{
        float n;
        char t;
     }
-    static float rnd(float min, float max){
+    */static float rnd(float min, float max){
         float rn=0;
         rn= (float) (Math.random()*(max-min)+min);
         return rn;
     }
-
+/*
     static char genchar(char c){
         char ch=c;
         switch (ch){
@@ -659,57 +670,73 @@ break;
         return ch;
 
     }
-    static void genworld(float[][] world,char[][] land, int w, int h, int seed){
-        worlds[] wo=new worlds[seed];
-
-
-
-
-        for (int i=0;i<w;i++){
-            for (int j=0; j<h; j++){
-                world[i][j]=0;
-                land[i][j]=' ';
+    */
+    static void genworld(float[][] world,char[][] land,int x,int y, int w,int cou,int lim){
+        if (cou<=lim) {
+            if (land[x][y] == ' ') {
+               Color c = new Color( img.getRGB(x,y));
+                world[x][y] = c.getRed()/20;
+                land[x][y]='0';
             }
-        }
-        for (int i=0;i<seed;i++){
-            wo[i]=new worlds();
-            int x = 0 + (int)(Math.random() * (w-1));
-            int y = 0 + (int)(Math.random() * (h-1));
-            char cc=genchar(' ');
-            wo[i].x=x;
-            wo[i].y=y;
-            wo[i].n=genfl(cc);
-            wo[i].t=cc;
-
-            world[wo[i].x][wo[i].y]=wo[i].n;
-            land[x][y]=cc;
-        }
-
-
-        for (int i=0;i<w;i++){
-            for (int j=0; j<h; j++){
-                if (world[i][j]!=0){
-                    char cc=land[i][j];
-                   if (i-1>=0 && j-1>=0) obworld(world,land,cc,i-1,j-1);
-                    if (i-1>=0 ) obworld(world,land,cc,i-1,j);
-                    if (j-1>=0 ) obworld(world,land,cc,i,j-1);
-                    if (j+1<h ) obworld(world,land,cc,i,j+1);
-                    if (i+1<w ) obworld(world,land,cc,i+1,j);
-                    if (i+1<w && j+1<h) obworld(world,land,cc,i+1,j+1);
-                    if (i-1>=0 && j+1<h) obworld(world,land,cc,i-1,j+1);
-                    if (i+1<w && j-1>=0) obworld(world,land,cc,i+1,j-1);
+            if (x+w<Landscape.w && y+w<Landscape.h) {
+                if (land[x + w][y + w]==' ') {
+                    Color c = new Color( img.getRGB(x,y));
+                    world[x][y] = c.getRed()/20;
+                    land[x + w][y + w]='0';
                 }
             }
-        }
-        for (int i=0;i<w;i++){
-            for (int j=0; j<h; j++) {
-             if (land[i][j]==' '){
-                 land[i][j]='~';
-                 world[i][j]=genfl('~');
-             }
+            if (x+w<Landscape.w) {
+                if (land[x + w][y] == ' ') {
+                    Color c = new Color( img.getRGB(x,y));
+                    world[x][y] = c.getRed()/20;
+                    land[x + w][y] ='0';
+                }
             }
+            if(y+w<Landscape.h) {
+                if (land[x][y + w] == ' ') {
+                    Color c = new Color( img.getRGB(x,y));
+                    world[x][y] = c.getRed()/20;
+                    land[x][y + w] ='0';
+                }
+            }
+            if (x+w/2<Landscape.w && y+w/2<Landscape.h) {
+                world[x + w / 2][y + w / 2] = (world[x][y] + world[x + w][y + w] + world[x + w][y] + world[x][y + w]) / 4+rnd(-2,2) ;
+            }
+            float a = 0; //    b
+            float b = 0; //a       c
+            float c = 0; //    x
+            float d = 0; //    d
+
+           if (x<Landscape.w && y<Landscape.h) a = world[x][y];
+            if (y - w / 2 >= 0 && x+w/2<Landscape.w) b = world[x + w / 2][y - w / 2];
+            if (x + w <= Landscape.w && y<Landscape.h) c = world[x + w][y];
+            if (y + w / 2 < Landscape.h && x+w/2<Landscape.w) d = world[x + w / 2][y + w / 2];
+           if (x+w/2<Landscape.w && y<Landscape.h) world[x + w / 2][y] = (a + b + c + d) / 4+rnd(-2,2);
+          if (y<Landscape.h && x<Landscape.w)  a = world[x][y];
+            if (x - w / 2 >= 0 && y+w/2<Landscape.h) b = world[x - w / 2][y + w / 2];
+            if (x<Landscape.w && y + w < Landscape.h) c = world[x][y + w];
+            if (x+w/2<Landscape.w && y + w / 2 <= Landscape.h) d = world[x + w / 2][y + w / 2];
+           if(x<Landscape.w && y+w/2<Landscape.h) world[x][y + w / 2] = (a + b + c + d) / 4+rnd(-2,2);
+           if ((int) (x + 1.5 * w)<Landscape.w && y+w/2<Landscape.h) a = world[(int) (x + 1.5 * w)][y + w / 2];
+            if (x + w < Landscape.w && y<Landscape.h) b = world[x + w][y];
+            if (x+w/2 < Landscape.w && y + w / 2 < Landscape.h) c = world[x + w / 2][y + w / 2];
+            if (x+w < Landscape.w && y + w <= Landscape.h) d = world[x + w][y + w];
+           if (x+w/2 < Landscape.w && y+w < Landscape.h) world[x + w / 2][y + w] = (a + b + c + d) / 4 +rnd(-2,2);
+
+           if (x+w/2<Landscape.w && y+w/2<Landscape.h) a = world[x + w / 2][y + w / 2];
+            if (x<Landscape.w && y + w < Landscape.h) b = world[x][y + w];
+            if (x+w/2<Landscape.w && y + w / 2 <= Landscape.h) c = world[x + w / 2][y + w / 2];
+            if (x+w/2<Landscape.w && (int) (y + 1.5 * w) < Landscape.h) d = world[x + w / 2][(int) (y + 1.5 * w)];
+           if(x+w/2<Landscape.w && y+w<Landscape.h) world[x + w / 2][y + w] = (a + b + c + d) / 4+rnd(-2,2);
+
+
+            if (x<Landscape.w && y<Landscape.h) genworld(world, land, x, y, w / 2, cou + 1,lim);
+           if (x+w/2<Landscape.w) genworld(world, land, x + w / 2, y, w / 2, cou + 1,lim);
+            if (y+w/2<Landscape.h) genworld(world, land, x, y + w / 2, w / 2, cou + 1,lim);
+            if (x+w/2<Landscape.w && y+w/2<Landscape.h) genworld(world, land, x + w / 2, y + w / 2, w / 2, cou + 1,lim);
         }
-    }
+        }
+
     void drawsphere(GL gl, GLU glu,int radius, int i1,int i2){
         GLUquadric quad = glu.gluNewQuadric();
         sky.bind(gl);
@@ -717,7 +744,6 @@ break;
         //   sky.disable(gl);
         glu.gluDeleteQuadric(quad);
     }
-
     @Override
     public void display(GLAutoDrawable drawable) {
         GL2 gl = drawable.getGL().getGL2();  // get the OpenGL 2 graphics context
@@ -826,15 +852,27 @@ break;
 
             }
             break;
+            case "x":{
+                for (int i=0; i<w; i++){
+                    for (int j=0; j<h; j++){
+                        land[i][j]=0;
+                    }
+                }
+                for (int i=0;i<w;i++){
+                    for (int j=0; j<h; j++){
+                        land[i][j]=' ';
+                    }
+                }
+                genworld(n,land, 0, 0, 70,0,5);
+            }
+            break;
         }
 
       //  drawground(gl,100,0,100);
         //drawcube(gl,-100,-100,-100,400,sky);
         landscape(gl,0,0,0,n,land,w,h);
-        drawground(gl,-200,0.2f,-200,water);
-        drawsphere(gl,glu,400,15,10);
-
-
+       // drawground(gl,-200,-2,-200,water);
+       drawsphere(gl,glu,400,15,10);
     }
 
     @Override
